@@ -5,5 +5,5 @@ module.exports = {
   railingComma: 'none',
   arrowParens: 'avoid',
   semi: false,
-  printWidth: 80,
+  printWidth: 60,
 }
