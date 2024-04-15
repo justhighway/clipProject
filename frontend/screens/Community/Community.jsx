@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Button, TextInput, FlatList, ScrollView, Modal, StyleSheet, Image, TouchableOpacity, Platform } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, Button, TextInput, FlatList, ScrollView, Modal, StyleSheet, Image, TouchableOpacity, Platform, BackHandler } from 'react-native'; // BackHandler 추가
 import * as ImagePicker from 'expo-image-picker';
+import { useNavigation } from '@react-navigation/native';
 
-export default function App() {
+export default function Community() {
+  const navigation = useNavigation(); 
   const [posts, setPosts] = useState([]);
   const [newCategory, setNewCategory] = useState('');
   const [newTitle, setNewTitle] = useState('');
   const [newContent, setNewContent] = useState('');
-  const [newKeywords, setNewKeywords] = useState('');
+
   const [editingPost, setEditingPost] = useState(null);
   const [isModalVisible, setModalVisible] = useState(false);
   const [image, setImage] = useState(null);
@@ -16,21 +18,26 @@ export default function App() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [filteredPosts, setFilteredPosts] = useState([]);
 
+  const postsRef = useRef([]); 
+
+  useEffect(() => {
+    postsRef.current = posts;
+  }, [posts]);
+  
   const addPost = () => {
-    if (newCategory && newTitle && newContent && newKeywords) {
+    if (newCategory && newTitle && newContent) {
       const newPost = {
         id: Date.now(),
         category: newCategory,
         title: newTitle,
         content: newContent,
-        keywords: newKeywords,
-        image: image,
+        image: image
       };
       setPosts([...posts, newPost]);
       setNewCategory('');
       setNewTitle('');
       setNewContent('');
-      setNewKeywords('');
+
       setImage(null);
       setModalVisible(false);
     }
@@ -41,7 +48,7 @@ export default function App() {
     setNewCategory(post.category);
     setNewTitle(post.title);
     setNewContent(post.content);
-    setNewKeywords(post.keywords);
+
     setImage(post.image);
     setModalVisible(true);
   };
@@ -55,8 +62,7 @@ export default function App() {
               category: newCategory,
               title: newTitle,
               content: newContent,
-              keywords: newKeywords,
-              image: image,
+              image: image
             }
           : post
       );
@@ -65,7 +71,7 @@ export default function App() {
       setNewCategory('');
       setNewTitle('');
       setNewContent('');
-      setNewKeywords('');
+
       setImage(null);
       setModalVisible(false);
     }
@@ -76,10 +82,11 @@ export default function App() {
     setNewCategory('');
     setNewTitle('');
     setNewContent('');
-    setNewKeywords('');
+
     setImage(null);
     setModalVisible(false);
   };
+
 
   const deletePost = (id) => {
     const updatedPosts = posts.filter((post) => post.id !== id);
@@ -101,7 +108,7 @@ export default function App() {
       setImage(result.assets[0].uri);
     }
   };
-  
+
   const getPermission = async () => { 
     if (Platform.OS !== 'web') {
       const {
@@ -115,27 +122,43 @@ export default function App() {
     }
   };
 
-  const searchFilter = (item) => { //검색 기능
+  const searchFilter = (item) => {
     const titleMatch = item.title.toLowerCase().includes(searchKeyword.toLowerCase());
     const contentMatch = item.content.toLowerCase().includes(searchKeyword.toLowerCase());
-    return titleMatch || contentMatch;
+    const categoryMatch = item.category.toLowerCase().includes(searchKeyword.toLowerCase());
+    return titleMatch || contentMatch || categoryMatch;
   };
 
   useEffect(() => {
     setFilteredPosts(posts.filter(searchFilter));
   }, [searchKeyword, posts]);
   
-  //게시판
+  // BackHandler 추가
+  useEffect(() => {
+    const backAction = () => {
+      if (isGuideModalVisible) {
+        setGuideModalVisible(false);
+        return true;
+      }
+      return false;
+    };
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+    return () => backHandler.remove();
+  }, [isGuideModalVisible]);
+
   return ( 
-    <View style={{ flex: 1, padding: 12 }}> 
-      <Text style={{ fontSize: 20, marginBottom: 10, marginTop: 10 }}></Text>
-      
+    <View style={{ flex: 1, padding: 7 }}> 
+      {/* 빈칸 */}
+
       <TextInput
-        style={styles.searchInput}
-        placeholder="  글 제목"
+        style={[styles.searchInput, { marginTop: 45 }]} 
+        placeholder="  게시판 제목"
         value={searchKeyword}
         onChangeText={(text) => setSearchKeyword(text)}
       />
+
 
       <TouchableOpacity
         style={[styles.searchInput, { marginTop: 0, marginBottom: 10, backgroundColor: 'lightgray', padding: 10 }]}
@@ -151,7 +174,7 @@ export default function App() {
           <View style={styles.flatListItem}>
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate('Board');
+                navigation.navigate('Board')
               }}
               onLongPress={() => setEditingItem(editingItem === item ? null : item)}
             >
@@ -159,16 +182,16 @@ export default function App() {
                 {item.image && <Image source={{ uri: item.image }} style={{ width: 80, height: 80, marginRight: 10, marginBottom: 0}} />}
                 <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{item.title}</Text>
-                <Text><Text style={{ color: 'gray', fontWeight: 'bold' }}>카테고리:</Text> {item.category}</Text>
-                <Text><Text style={{ color: 'gray', fontWeight: 'bold' }}>지역:</Text> {item.keywords}</Text>
+                <Text><Text style={{ color: 'black', fontWeight: 'bold' }}>카테고리:</Text> {item.category}</Text>
                 <Text numberOfLines={1} ellipsizeMode="tail">{item.content}</Text>
+                <Text style={{ color: 'gray', fontSize: 12 }}>{formatDate(item.id)}</Text>
                 </View>
               </View>
             </TouchableOpacity>
             {editingItem === item && (
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <Button title="수정" onPress={() => editPost(item)} color="purple" />
-                <Button title="삭제" onPress={() => deletePost(item.id)} color="purple" />
+                <Button title="수정" onPress={() => editPost(item)} color="#8A2BE2" />
+                <Button title="삭제" onPress={() => deletePost(item.id)} color="#8A2BE2" />
               </View>
             )}
           </View>
@@ -176,7 +199,7 @@ export default function App() {
       />
 
       <View style={{ position: 'absolute', bottom: 20, right: 20 }}>
-        <Button title="작성" onPress={() => setModalVisible(true)} color="purple"/>
+        <Button title="생성" onPress={() => setModalVisible(true)} color="#8A2BE2"/>
       </View>
 
       <Modal
@@ -185,12 +208,14 @@ export default function App() {
         transparent={false}
       >
         <ScrollView style={{ flex: 1, padding: 20 }}>
-          <Text style={{ fontSize: 24, marginBottom: 20 }}>
-            {editingPost ? '게시글 수정' : '게시판 작성'}
-          </Text>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ fontSize: 24, marginBottom: 20 }}>
+              {editingPost ? '게시판 수정' : '게시판 생성' }
+            </Text>
+          </View>
           
           {image && <Image source={{ uri: image }} style={{ width: 100, height: 100, marginBottom: 10 }}/>}
-          <Button title="이미지 업로드" onPress={pickImage} color="purple" />
+          <Button title="이미지 업로드" onPress={pickImage} color="#8A2BE2" />
 
           <TextInput
             style={[styles.textInput, { marginTop: 10 }]}
@@ -204,19 +229,14 @@ export default function App() {
             value={newCategory}
             onChangeText={(text) => setNewCategory(text)}
           />
-          <TextInput
-            style={styles.textInput}
-            placeholder="지역"
-            value={newKeywords}
-            onChangeText={(text) => setNewKeywords(text)}
-          />
+          
           <TextInput
             style={{
               borderWidth: 1,
               borderColor: 'gray',
               padding: 8,
               marginBottom: 10,
-              minHeight: 330, 
+              minHeight: 380, 
               textAlign: 'left', 
               textAlignVertical: 'top', 
             }}
@@ -227,10 +247,10 @@ export default function App() {
           />
           <View style={styles.buttonContainer}>
             <Button
-              title={editingPost ? '수정' : '작성'}
-              onPress={editingPost ? updatePost : addPost} color="purple"
+              title={editingPost ? '수정' : '생성'}
+              onPress={editingPost ? updatePost : addPost} color="#8A2BE2"
             />
-            <Button title="취소" onPress={cancelEdit} color="purple"/>
+            <Button title="취소" onPress={cancelEdit} color="#8A2BE2"/>
           </View>
         </ScrollView>
       </Modal>
@@ -239,7 +259,7 @@ export default function App() {
         visible={isGuideModalVisible}
         animationType="fade"
         transparent={true}
-        onRequestClose={() => setGuideModalVisible(false)}
+        onRequestClose={() => setGuideModalVisible(false)} // BackHandler로 변경
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
@@ -262,6 +282,26 @@ export default function App() {
     </View>
   );
 }
+
+const formatDate = (timestamp) => {
+  const currentDate = new Date();
+  const postDate = new Date(timestamp);
+  const timeDiff = Math.floor((currentDate - postDate) / (60 * 1000)); // 시간 차이를 분 단위로 계산
+
+  const pad = (num) => {
+    return num < 10 ? '0' + num : num;
+  };
+
+  if (timeDiff < 1) {
+    return '방금 전';
+  } else if (timeDiff < 60) {
+    return `${timeDiff}분 전 / ${postDate.getFullYear()}.${pad(postDate.getMonth() + 1)}.${pad(postDate.getDate())}`;
+  } else if (timeDiff < 1440) {
+    return `${Math.floor(timeDiff / 60)}시간 전 / ${postDate.getFullYear()}.${pad(postDate.getMonth() + 1)}.${pad(postDate.getDate())}`;
+  } else {
+    return `${postDate.getFullYear()}.${pad(postDate.getMonth() + 1)}.${pad(postDate.getDate())}`;
+  }
+};
 
 const styles = StyleSheet.create({
   flatListItem: {
@@ -328,3 +368,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
