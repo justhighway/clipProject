@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, Button, TextInput, FlatList, ScrollView, Modal, StyleSheet, Image, TouchableOpacity, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { useNavigation } from '@react-navigation/native'; 
+import { useNavigation } from '@react-navigation/native';
 
 export default function Board() {
   const navigation = useNavigation(); 
@@ -113,21 +113,21 @@ export default function Board() {
   const pickImage = async () => {
     const hasPermission = await getPermission();
     if (!hasPermission) return;
-  
+
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
-    
+
 
     if (!result.cancelled) {
       setImage(result.assets[0].uri);
     }
   };
-  
-  const getPermission = async () => { 
+
+  const getPermission = async () => {
     if (Platform.OS !== 'web') {
       const {
         status,
@@ -149,18 +149,15 @@ export default function Board() {
   useEffect(() => {
     setFilteredPosts(posts.filter(searchFilter));
   }, [searchKeyword, posts]);
-  
-  //게시판
-  return ( 
-    <View style={{ flex: 1, padding: 7 }}> 
-      {/* 빈칸 */}
+
+  return (
+    <View style={{ flex: 1, padding: 7 }}>
       <TextInput
-        style={[styles.searchInput, { marginTop: 45 }]} 
+        style={[styles.searchInput, { marginTop: 45 }]}
         placeholder="  게시글 제목"
         value={searchKeyword}
         onChangeText={(text) => setSearchKeyword(text)}
       />
-
 
       <TouchableOpacity
         style={[styles.searchInput, { marginTop: 0, marginBottom: 10, backgroundColor: 'lightgray', padding: 10 }]}
@@ -209,11 +206,9 @@ export default function Board() {
         )}
       />
 
-
-      <View style={{ position: 'absolute', bottom: 20, right: 20 }}>
+      <View style={{ position: 'absolute', bottom: 20, left: 0, right: 0, paddingHorizontal: 20 }}>
         <Button title="작성" onPress={() => setModalVisible(true)} color="#8A2BE2"/>
       </View>
-
 
       <Modal
         visible={isModalVisible}
@@ -226,7 +221,7 @@ export default function Board() {
               {editingPost ? '게시글 수정' : '게시글 작성' }
             </Text>
           </View>
-          
+
           {image && <Image source={{ uri: image }} style={{ width: 100, height: 100, marginBottom: 10 }}/>}
           <Button title="이미지 업로드" onPress={pickImage} color="#8A2BE2" />
 
@@ -266,21 +261,19 @@ export default function Board() {
               borderColor: 'gray',
               padding: 8,
               marginBottom: 10,
-              minHeight: 230, 
-              textAlign: 'left', 
-              textAlignVertical: 'top', 
+              minHeight: 230,
+              textAlign: 'left',
+              textAlignVertical: 'top',
             }}
             placeholder="내용을 입력하세요"
             value={newContent}
             onChangeText={(text) => setNewContent(text)}
-            multiline={true} 
+            multiline={true}
           />
           <View style={styles.buttonContainer}>
-            <Button
-              title={editingPost ? '수정' : '작성'}
-              onPress={editingPost ? updatePost : addPost} color="#8A2BE2"
-            />
-            <Button title="취소" onPress={cancelEdit} color="#8A2BE2"/>
+            <TouchableOpacity style={styles.fullWidthButton} onPress={editingPost ? updatePost : addPost}>
+                  <Text style={styles.fullWidthButtonText}>{editingPost ? '수정' : '작성'}</Text>
+                </TouchableOpacity>
           </View>
         </ScrollView>
       </Modal>
@@ -349,7 +342,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     marginBottom: 10,
   },
   searchInput: {
@@ -368,7 +361,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 20,
     padding: 35,
-    alignItems: 'flex-start', 
+    alignItems: 'flex-start',
     textAlign: 'left', // 좌로 정렬
     shadowColor: '#000',
     shadowOffset: {
@@ -397,4 +390,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
   },
+  fullWidthButton: {
+    width: '100%',
+    padding: 15,
+    backgroundColor: '#8A2BE2',
+    alignItems: 'center',
+    borderRadius: 5,
+  },
+  fullWidthButton: {
+    width: '100%',
+    paddingVertical: 10, // 세로 패딩 값 조정
+    paddingHorizontal: 15,
+    backgroundColor: '#8A2BE2',
+    alignItems: 'center',
+    borderRadius: 5,
+  },
+  fullWidthButtonText: {
+    color: 'white', // 흰색으로 변경
+    fontSize: 15,
+  },
 });
+

@@ -4,7 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 
 export default function Community() {
-  const navigation = useNavigation(); 
+  const navigation = useNavigation();
   const [posts, setPosts] = useState([]);
   const [newCategory, setNewCategory] = useState('');
   const [newTitle, setNewTitle] = useState('');
@@ -18,12 +18,12 @@ export default function Community() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [filteredPosts, setFilteredPosts] = useState([]);
 
-  const postsRef = useRef([]); 
+  const postsRef = useRef([]);
 
   useEffect(() => {
     postsRef.current = posts;
   }, [posts]);
-  
+
   const addPost = () => {
     if (newCategory && newTitle && newContent) {
       const newPost = {
@@ -96,20 +96,20 @@ export default function Community() {
   const pickImage = async () => {
     const hasPermission = await getPermission();
     if (!hasPermission) return;
-  
+
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
-  
+
     if (!result.cancelled) {
       setImage(result.assets[0].uri);
     }
   };
 
-  const getPermission = async () => { 
+  const getPermission = async () => {
     if (Platform.OS !== 'web') {
       const {
         status,
@@ -132,7 +132,7 @@ export default function Community() {
   useEffect(() => {
     setFilteredPosts(posts.filter(searchFilter));
   }, [searchKeyword, posts]);
-  
+
   // BackHandler 추가
   useEffect(() => {
     const backAction = () => {
@@ -148,12 +148,12 @@ export default function Community() {
     return () => backHandler.remove();
   }, [isGuideModalVisible]);
 
-  return ( 
-    <View style={{ flex: 1, padding: 7 }}> 
+  return (
+    <View style={{ flex: 1, padding: 7 }}>
       {/* 빈칸 */}
 
       <TextInput
-        style={[styles.searchInput, { marginTop: 45 }]} 
+        style={[styles.searchInput, { marginTop: 45 }]}
         placeholder="  게시판 제목"
         value={searchKeyword}
         onChangeText={(text) => setSearchKeyword(text)}
@@ -198,8 +198,8 @@ export default function Community() {
         )}
       />
 
-      <View style={{ position: 'absolute', bottom: 20, right: 20 }}>
-        <Button title="생성" onPress={() => setModalVisible(true)} color="#8A2BE2"/>
+      <View style={{ position: 'absolute', bottom: 20, left: 0, right: 0, paddingHorizontal: 20 }}>
+        <Button title="작성" onPress={() => setModalVisible(true)} color="#8A2BE2" style={{paddingVertical: 10}}/>
       </View>
 
       <Modal
@@ -213,7 +213,7 @@ export default function Community() {
               {editingPost ? '게시판 수정' : '게시판 생성' }
             </Text>
           </View>
-          
+
           {image && <Image source={{ uri: image }} style={{ width: 100, height: 100, marginBottom: 10 }}/>}
           <Button title="이미지 업로드" onPress={pickImage} color="#8A2BE2" />
 
@@ -229,28 +229,26 @@ export default function Community() {
             value={newCategory}
             onChangeText={(text) => setNewCategory(text)}
           />
-          
+
           <TextInput
             style={{
               borderWidth: 1,
               borderColor: 'gray',
               padding: 8,
               marginBottom: 10,
-              minHeight: 380, 
-              textAlign: 'left', 
-              textAlignVertical: 'top', 
+              minHeight: 380,
+              textAlign: 'left',
+              textAlignVertical: 'top',
             }}
             placeholder="내용을 입력하세요"
             value={newContent}
             onChangeText={(text) => setNewContent(text)}
-            multiline={true} 
+            multiline={true}
           />
           <View style={styles.buttonContainer}>
-            <Button
-              title={editingPost ? '수정' : '생성'}
-              onPress={editingPost ? updatePost : addPost} color="#8A2BE2"
-            />
-            <Button title="취소" onPress={cancelEdit} color="#8A2BE2"/>
+            <TouchableOpacity style={styles.fullWidthButton} onPress={editingPost ? updatePost : addPost}>
+              <Text style={styles.fullWidthButtonText}>{editingPost ? '수정' : '생성'}</Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </Modal>
@@ -338,7 +336,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 20,
     padding: 35,
-    alignItems: 'flex-start', 
+    alignItems: 'flex-start',
     textAlign: 'left', // 좌로 정렬
     shadowColor: '#000',
     shadowOffset: {
@@ -367,5 +365,29 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
   },
+  fullWidthButton: {
+    backgroundColor: '#8A2BE2',
+    padding: 10,
+    borderRadius: 5,
+    width: '100%',
+    alignItems: 'center',
+  },
+  fullWidthButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderWidth: 1,       // 테두리 두께
+    borderColor: 'black', // 테두리 색상
+    borderRadius: 20,     // 테두리 모양
+  },
 });
+
+
+
 

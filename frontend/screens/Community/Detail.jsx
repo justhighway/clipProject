@@ -102,15 +102,16 @@ const Detail = ({ route }) => {
         </View>
         {/* 댓글 목록 */}
         <View style={styles.commentsContainer}>
-            {comments.map((comment, index) => (
-              <View key={index} style={styles.commentContainer}>
+          {comments.map((comment, index) => (
+            <View key={index} style={styles.commentWrapper}>
+              <View style={styles.commentContainer}>
                 <View style={styles.commentContent}>
                   <Text style={styles.commentText}>{comment.text}</Text>
                   <Text style={styles.commentTimestamp}>{formatTimestamp(comment.timestamp)}</Text>
                 </View>
-                {index !== comments.length - 1 && <View style={styles.separator}></View>}
               </View>
-            ))}
+            </View>
+          ))}
         </View>
       </View>
     </View>
@@ -229,6 +230,14 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: 'lightgray',
     marginVertical: 5, // 수평 경계선의 상단 및 하단 간격
+  },
+  commentWrapper: {
+    borderWidth: 1,
+    borderColor: 'lightgray',
+    borderRadius: 10,
+    paddingHorizontal: 10, // 좌우 여백 조정
+    paddingVertical: 5, // 상하 여백 조정
+    marginBottom: 5,
   },
 });
 
